@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const port = process.env.PORT || 5000;
 
@@ -19,6 +19,8 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const serviceCollection = client.db('weedingPhotographer').collection('services');
+        const reviewCollection = client.db('weedingPhotographer').collection('reviews');
+
         app.post('/services', async (req, res) => {
             const services = req.body;
             const result = await serviceCollection.insertOne(services);
@@ -31,12 +33,31 @@ async function run() {
             const services = await cursor.toArray();
             res.send(services);
         });
+        app.get('/services/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await serviceCollection.findOne(query);
+            res.send(result);
+        });
 
         app.get('/home/services', async (req, res) => {
             const query = {};
             const cursor = serviceCollection.find(query).limit(3);
             const services = await cursor.toArray();
             res.send(services);
+        });
+
+        app.post('/services/review', async (req, res) => {
+            const reviews = req.body;
+            const result = await reviewCollection.insertOne(reviews);
+            res.send(result);
+        });
+
+        app.get('/service/review', async (req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const reviews = await cursor.toArray();
+            res.send(reviews);
         });
 
 
