@@ -60,6 +60,8 @@ async function run() {
             const reviews = await cursor.toArray();
             res.send(reviews);
         });
+
+        // my reviews api 
         app.get('/my/reviews/:email', async (req, res) => {
             const email = req.params.email;
             const query = { user_email: email };
@@ -67,6 +69,36 @@ async function run() {
             const reviews = await cursor.toArray();
             res.send(reviews);
         });
+
+        app.get('/my/reviews/update/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const reviews = await reviewCollection.findOne(query);
+            res.send(reviews);
+        });
+
+        app.put('/my/reviews/update/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const user = req.body;
+            const option = { upsert: true };
+            const updatedUser = {
+                $set: {
+                    rating: user.rating,
+                    review: user.review
+                }
+            }
+            const result = await reviewCollection.updateOne(filter, updatedUser, option);
+            res.send(result);
+        });
+
+        app.delete('/my/reviews/delete/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await reviewCollection.deleteOne(query);
+            res.send(result);
+        });
+
 
 
 
